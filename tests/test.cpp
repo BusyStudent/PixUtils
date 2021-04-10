@@ -1,7 +1,25 @@
 #include <SDL2/SDL.h>
+#include <iostream>
 #include "../src/pixutils.hpp"
+void test_clamp(){
+    PixUtils::Rect rect = {
+        20,
+        500,
+        500,
+        400
+    };
+    PixUtils::Rect r1 = {
+        0,
+        0,
+        500,
+        400
+    };
+    std::cout << rect << std::endl;
+    std::cout << rect.intersect(r1) << std::endl;
+}
 int main(){
     using PixUtils::Array;
+    test_clamp();
     SDL_Window *win = SDL_CreateWindow("a",0,0,500,500,0);
     auto *s = SDL_GetWindowSurface(win);
 
@@ -24,19 +42,12 @@ int main(){
         SDL_UpdateWindowSurface(win);
     }
     SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormat(0,200,200,32,SDL_PIXELFORMAT_RGBA32);
-
-    PixUtils::Unsafe::Copy(
-        static_cast<Uint32*>(s->pixels),
-        s->w,
-        0,
-        0,
-        200,
-        200,
-        static_cast<Uint32*>(surf->pixels),
-        surf->w,
-        0,
-        0
-    );
+    Array surf_array(surf->pixels,200,200);
+    surf_array.copyfrom(array,{100,100,200,200},0,0,PixUtils::SDLConverter(
+        s->format,
+        surf->format
+    ));
+    //PixUtils::Unsafe::FillRect(static_cast<Uint32*>(surf->pixels),surf->w,0,0,100,100,22);
     SDL_SaveBMP(surf,"copy.bmp");
     SDL_FreeSurface(surf);
     SDL_FreeSurface(s);
